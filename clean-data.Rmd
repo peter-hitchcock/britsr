@@ -1,0 +1,227 @@
+---
+title: "Cleaning SRET"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.width=14, fig.height=12)
+```
+
+# Load packages, source functions, set plot parameters  
+
+```{r, results = hide}
+# Load packages, source functions, set plot parameters, get behavioral and DIC dfs   
+packages_to_load <- c(
+  "dplyr",
+  "tidyverse",
+  "latex2exp",
+  "purrr",
+  "tidyr",
+  "rlang",
+  "patchwork",
+  "haven",
+  "RWiener",
+  "ggplot2",
+  "psych"
+)
+sapply(packages_to_load, require, character.only=TRUE)
+
+sf <- function() sapply(fs, source)
+fs <- c(
+  paste0('./Modules/', list.files('./Modules/'))  
+)
+sf()
+SetPlotPars()
+```
+
+# Load Data  
+
+```{r}
+# Get main SRET_CTL df..
+bx_df <- read.csv("./../../data/raw_files/sret_from_KW_06_08_20.csv")
+# .. and df with some extra info to put in 
+
+extra_df_full <- 
+  read.csv("./../../data/raw_files/tx_cond+ffmq+maas_from_KW_6.24.2020.csv")
+```
+
+
+Do some cleanup  
+```{r}
+# 12.10 adding but not exporting item 
+bx_dfs <- # Short df
+  setNames(bx_df[c("ID", "Time", "RT",  
+                   "VALENCE", "CONDITION", "RESPONSE", "CORRECTNESS", "CAPS", "ITEM")], 
+         c("subj_idx", "session",  "rt", 
+                    "valence", "task", "response", "correct", "ctl_type", "item"))
+```
+
+
+Some original code is left commented in the below from what was used to create `s_bdf` for model running originally,
+following an R upgrade that apparently led to stricter factor change rules (eg. relevel on character vec doesn't auto-convert to factor first)  
+
+```{r}
+# Numeric codes 
+#bx_dfs$task_n <- as.numeric(bx_dfs$task)-1 # 1 is SRET, 0 is CTL  # No longer needed 
+#bx_dfs$session <- relevel(bx_dfs$session, "Pre")
+bx_dfs$session <- relevel(factor(bx_dfs$session), "Pre")
+# Drop miss trials from dataset
+bx_dfs <- bx_dfs[!bx_dfs$response=="MISS", ]
+```
+
+```{r}
+bx_dfs$response <- as.numeric(droplevels(factor(bx_dfs$response)))-2
+bx_dfs <- bx_dfs[!bx_dfs$response==-1, ] # Drop one missed trial that was labeled -1
+
+# Recode correct 
+bx_dfs$correct_c <- as.character(bx_dfs$correct)
+bx_dfs[bx_dfs$task == "case" & bx_dfs$correct_c=="correct", "correct"] <- 1
+bx_dfs[bx_dfs$task == "case" & bx_dfs$correct_c=="incorrect", "correct"] <- 0
+# (^changed after R updated 2022 because stricter scheme disallows below)
+#bx_dfs$correct <- relevel(factor(bx_dfs$correct), "incorrect")
+#bx_dfs$correct <- relevel(bx_dfs$correct, "incorrect")
+#bx_dfs$correct_n <- as.numeric(bx_dfs$correct)-1
+
+# Note negative is the reference level so increases in posterior indicate salutary changes 
+#bx_dfs$valence_n <- as.numeric(bx_dfs$valence)-1
+bx_dfs$valence_n <- as.numeric(relevel(factor(bx_dfs$valence), "negative"))-1
+
+# Pre is reference level
+bx_dfs$session_n <- as.numeric(bx_dfs$session)-1
+
+# Spot checks 
+# table(bx_dfs$response)
+# table(bx_dfs[bx_dfs$task=="case", "response"])
+#which(is.na(bx_dfs$response))
+#table(as.numeric(bx_dfs$correct)-1)
+#bx_dfs %>% select(valence, valence_n)
+```
+
+```{r}
+#table(bx_dfs$subj_idx, bx_dfs$session)
+bx_dfs <- bx_dfs %>% filter(rt > 200)
+bx_dfs$rt <- bx_dfs$rt/1e3 
+# Add task switch var 
+#bx_dfs$task_switch <- rep(NA, nrow(bx_dfs))
+bx_dfs <- lapply(split(bx_dfs, bx_dfs$subj_idx), function (x) {
+  x$task_switch <- 
+    c(0, if_else((x[2:nrow(x), "task"]==x[1:nrow(x)-1, "task"]), 0, 1))
+x  
+}) %>% bind_rows()
+# bx_dfs %>% filter(subj_idx==3) # Spot checks
+# bx_dfs %>% filter(subj_idx==105)
+table(bx_dfs$task_switch) # About even number
+```
+
+```{r}
+c_bdf <- bx_dfs %>% filter(task=="case")
+c_bdf$correct_n <- as.numeric(c_bdf$correct)
+
+# Only one pt with fewer than 70% correct  
+correct_sum <- 
+  c_bdf %>%  group_by(session, subj_idx) %>% 
+    summarize(m=mean(correct_n))
+
+which(correct_sum$m < .7)
+
+low_perf_pt <- correct_sum[which(correct_sum$m < .7), "subj_idx"] # Pt performing ~ chance at post  
+
+# Drop this pt's data  
+bx_dfs <- bx_dfs %>% filter(!subj_idx == 36)
+
+# Drop the accidentally enrolled pt (see KW email exchange)  
+bx_dfs <- bx_dfs %>% filter(!subj_idx==139)
+```
+
+Center for more interpretable coefs  
+```{r}
+bx_dfs[c("val_ctr", "sess_ctr", "ts_ctr")] <- 
+  scale(bx_dfs[c("valence_n", "session_n", "task_switch")])
+```
+
+
+Put treatment cond in behavioral df
+
+```{r}
+ID_and_tx_cond <- extra_df_full %>% 
+  filter(ID %in% as.numeric(unlist(bx_dfs %>% select(subj_idx) %>% 
+                                     unique()))) %>% select(ID, Treatment) %>% arrange(ID)
+
+bx_dfs$treatment_cond <- NA
+if (all(ID_and_tx_cond$ID == unique(bx_dfs$subj_idx))) {
+  bx_dfs <- 
+    lapply(split(bx_dfs, bx_dfs$subj_idx), function(x) {
+  x$treatment_cond <- 
+    as.character(unlist(ID_and_tx_cond %>% filter(ID==unique(x$subj_idx)) %>% select(Treatment)))
+x  
+} ) %>% bind_rows()
+}
+
+bx_dfs$treatment_cond <- as.factor(bx_dfs$treatment_cond)
+
+# Spot checks
+# unique(bx_dfs[bx_dfs$subj_idx=="49", "treatment_cond"])
+# ID_and_tx_cond[ID_and_tx_cond$ID=="49", "Treatment"]
+# 
+# unique(bx_dfs[bx_dfs$subj_idx=="11", "treatment_cond"])
+# ID_and_tx_cond[ID_and_tx_cond$ID=="11", "Treatment"]
+# 
+# unique(bx_dfs[bx_dfs$subj_idx=="72", "treatment_cond"])
+# ID_and_tx_cond[ID_and_tx_cond$ID=="72", "Treatment"]
+# 
+# unique(bx_dfs[bx_dfs$subj_idx=="91", "treatment_cond"])
+# ID_and_tx_cond[ID_and_tx_cond$ID=="91", "Treatment"]
+# 
+# unique(bx_dfs[bx_dfs$subj_idx=="6", "treatment_cond"])
+# ID_and_tx_cond[ID_and_tx_cond$ID=="6", "Treatment"]
+# 
+# unique(bx_dfs[bx_dfs$subj_idx=="21", "treatment_cond"])
+# ID_and_tx_cond[ID_and_tx_cond$ID=="21", "Treatment"]
+# 
+# unique(bx_dfs[bx_dfs$subj_idx=="32", "treatment_cond"])
+# ID_and_tx_cond[ID_and_tx_cond$ID=="32", "Treatment"]
+
+# Basically even after exclusions w/ slightly more in FA 
+table(ID_and_tx_cond$Treatment)
+```
+
+
+```{r}
+non_completers <- names(which(table(bx_dfs$subj_idx, bx_dfs$session)[, 2]==0))
+bx_dfs <- bx_dfs %>% filter(!subj_idx %in% non_completers)
+length(unique(bx_dfs$subj_idx))
+```
+
+```{r}
+c_bdf_c <- bx_dfs %>% filter(task=="case")
+c_bdf_c$correct_n <- as.numeric(c_bdf_c$correct)
+
+median(data.frame(c_bdf_c %>% group_by(subj_idx) %>% summarize(m=mean(correct_n)))$m)
+```
+
+
+```{r}
+s_bdf <- bx_dfs %>% filter(task=="self")
+```
+
+
+Export data  
+```{r}
+# Just SRET 
+# s_bdf <- bx_dfs %>% filter(task=="self")
+# write.csv(s_bdf, "./../data/cleaned_files/s_bdf.csv")
+```
+
+
+Write out odd and even pre-data for split half reliability 
+```{r}
+pre_only <- s_bdf %>% filter(session=="Pre")
+idxs <- 1:nrow(pre_only) 
+even <- pre_only[idxs[lapply(idxs, "%%", 2)==0], ]
+odd <- pre_only[idxs[!lapply(idxs, "%%", 2)==0], ]
+table(odd$session)
+table(even$session)
+# write.csv(even, "../data/cleaned_files/s_bdf_even.csv")
+# write.csv(odd, "../data/cleaned_files/s_bdf_odd.csv")
+```
