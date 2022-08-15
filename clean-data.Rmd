@@ -98,6 +98,11 @@ bx_dfs$session_n <- as.numeric(bx_dfs$session)-1
 #bx_dfs %>% select(valence, valence_n)
 ```
 
+Only one trial is less than 200 ms  
+```{r}
+bx_dfs %>% filter(rt < 200)
+```
+
 ```{r}
 #table(bx_dfs$subj_idx, bx_dfs$session)
 bx_dfs <- bx_dfs %>% filter(rt > 200)
@@ -225,3 +230,23 @@ table(even$session)
 # write.csv(even, "../data/cleaned_files/s_bdf_even.csv")
 # write.csv(odd, "../data/cleaned_files/s_bdf_odd.csv")
 ```
+
+
+8/2 - Following reviewer request, prep deIDed data to make publicly available by putting in `Public_Data`   
+
+```{r}
+qairres <- read.csv("./../../data/raw_files/justDASSandFFMQ_with_imputes_replaced_with_999.csv")
+#write.csv(qairres, "./Public_Data/justDASSandFFMQ_with_imputes_replaced_with_999.csv")
+```
+```{r}
+bx_df <- read.csv("./../../data/cleaned_files/s_bdf.csv")
+#write.csv(bx_df, "./Public_Data/s_bdf.csv")
+```
+
+
+```{r}
+extra_df_full <- read.csv("./../../data/raw_files/tx_cond+ffmq+maas_from_KW_6.24.2020.csv")
+#write.csv(extra_df_full %>% select(ID, Treatment), "./Public_Data/tx_assignments.csv")
+```
+
+

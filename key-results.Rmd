@@ -7,15 +7,12 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(fig.width=14, fig.height=12)
-```
+
 
 
 # Prep  
 
-```{r, results = hide}
+```{r}
 # Load packages, source functions, set plot parameters, get behavioral and DIC dfs   
 packages_to_load <- c(
   "dplyr",
@@ -47,14 +44,17 @@ SetPlotPars()
 ```
 
 
+8/2/22 - Replacing old paths with public access data throughout doc wherever data shareable (leaving out raw trace files because they're too big)  
 ```{r}
 # Get main SRET_CTL df..
-bx_df <- read.csv("./../../data/cleaned_files/s_bdf.csv")
+#bx_df <- read.csv("./../../data/cleaned_files/s_bdf.csv")
+bx_df <- read.csv("./Public_Data/s_bdf.csv")
 # .. and df with some extra info to put in 
-extra_df_full <- read.csv("./../../data/raw_files/tx_cond+ffmq+maas_from_KW_6.24.2020.csv")
+#extra_df_full <- read.csv("./../../data/raw_files/tx_cond+ffmq+maas_from_KW_6.24.2020.csv")
+extra_df_full <- read.csv("./Public_Data/tx_assignments.csv")
 ```
 
-
+4/24/22 - See non-public directory for demographics  
 
 # Figure 1  
 
@@ -239,6 +239,8 @@ mdf
 ### Gelman Rubin of winning model  
 
 
+These files are too big to upload, but the MAP estimates derived from them are in the `Public_Data` dir — see below  
+
 ```{r}
 ReadTrace <- function(unique_str) read.csv(unique_str)
 
@@ -247,7 +249,6 @@ ndgr2 <- ReadTrace("../../model_res/final_traces_and_dics/traces/GR_run_also8k_d
 ndgr3 <- ReadTrace("../../model_res/final_traces_and_dics/traces/GR_run_also8k_ddm_add_trialwise_NO-SZ_s_vt_poutlier056294.csv")
 ndgr4 <- ReadTrace("../../model_res/final_traces_and_dics/traces/GR_run_also8k_ddm_add_trialwise_NO-SZ_s_vt_poutlier058876.csv")
 ```
-
 
 
 ```{r}
@@ -273,9 +274,12 @@ max(rhats)
 
 
 ```{r}
+# recovered <- 
+#   read.csv("../../model_res/par_recov/HDDM_par_recov_traces_v-val_ddm_add_trialwise_NO-SZ_s_vt_with-z_1239.csv")
 recovered <- 
-  read.csv("../../model_res/par_recov/HDDM_par_recov_traces_v-val_ddm_add_trialwise_NO-SZ_s_vt_with-z_1239.csv")
-simmed <- read.csv("../../model_res/par_recov/HDDM_sims_for_pr_add_trialwise_NO-SZ_s_vt_poutlier059513.csv")
+  read.csv("./Public_Data/HDDM_par_recov_traces_v-val_ddm_add_trialwise_NO-SZ_s_vt_with-z_1239.csv")
+#simmed <- read.csv("../../model_res/par_recov/HDDM_sims_for_pr_add_trialwise_NO-SZ_s_vt_poutlier059513.csv")
+simmed <- read.csv("./Public_Data/HDDM_sims_for_pr_add_trialwise_NO-SZ_s_vt_poutlier059513.csv")
 ```
 
 The across-trial variability parameters were run at the group level, so for these we'll look at the range of means used to generate alongside the recovered posterior  
@@ -384,7 +388,7 @@ if (all(rec_map$ID==gen_vals$subj_idx)) {
 }
 ```
 
-```{r, fig.width=12}
+```{r, fig.width=12, fig.height=10}
 pr_grid <- (pr_plots[[1]] + pr_plots[[2]]) /
   (pr_plots[[3]] + pr_plots[[4]]) /
   (pr_plots[[5]] + pr_plots[[6]]) 
@@ -532,11 +536,16 @@ model_names <- c("baseline", "+ valence", "+ valence * time", "+ bias", "+ sv an
 
 dic_values <-
   c(
-    read.csv("./../../model_res/final_traces_and_dics/dic/s_b_389_dic.csv", header=FALSE)$V2,
-    read.csv("./../../model_res/final_traces_and_dics/dic/s_b1_3987_dic.csv", header=FALSE)$V2,
-    read.csv("./../../model_res/final_traces_and_dics/dic/s_vt_dic.csv", header=FALSE)$V2,
-    read.csv("./../../model_res/final_traces_and_dics/dic/GR_8k_s_vt_poutlier058886dic.csv", header=FALSE)$V2,
-    read.csv("./../../model_res/final_traces_and_dics/dic/GR_run_also8k_ddm_add_trialwise_NO-SZ_s_vt_poutlier056294dic.csv", header=FALSE)$V2)
+    # read.csv("./../../model_res/final_traces_and_dics/dic/s_b_389_dic.csv", header=FALSE)$V2,
+    # read.csv("./../../model_res/final_traces_and_dics/dic/s_b1_3987_dic.csv", header=FALSE)$V2,
+    # read.csv("./../../model_res/final_traces_and_dics/dic/s_vt_dic.csv", header=FALSE)$V2,
+    # read.csv("./../../model_res/final_traces_and_dics/dic/GR_8k_s_vt_poutlier058886dic.csv", header=FALSE)$V2,
+    # read.csv("./../../model_res/final_traces_and_dics/dic/GR_run_also8k_ddm_add_trialwise_NO-SZ_s_vt_poutlier056294dic.csv", header=FALSE)$V2)
+    read.csv("./Public_Data/dic/s_b_389_dic.csv", header=FALSE)$V2,
+    read.csv("./Public_Data/dic/s_b1_3987_dic.csv", header=FALSE)$V2,
+    read.csv("./Public_Data/dic/s_vt_dic.csv", header=FALSE)$V2,
+    read.csv("./Public_Data/dic/GR_8k_s_vt_poutlier058886dic.csv", header=FALSE)$V2,
+    read.csv("./Public_Data/dic/GR_run_also8k_ddm_add_trialwise_NO-SZ_s_vt_poutlier056294dic.csv", header=FALSE)$V2)
 
 dic_df <- data.frame(model_names, dic_values)
 dic_df$delta_dic <- c(0, dic_values[2:5]-dic_values[1])
@@ -598,6 +607,10 @@ which(d1c$v_val_ctr.sess_ctr < 0)
 
 
 
+## Endorsement proportions  
+
+Positive and negative pre and differences therein  
+
 ```{r}
 nends_b <- bx_df %>% filter(session=="Pre", valence=="negative") %>% 
   group_by(subj_idx) %>% summarize(m=mean(response), mrt=mean(rt))
@@ -613,6 +626,7 @@ if (all(pends_b$subj_idx==nends_b$subj_idx)) {
 # nends_b$mrt
 ```
 
+RTs  
 
 ```{r}
 rt <- bx_df %>% 
@@ -624,7 +638,11 @@ rt_val <- bx_df %>%
 rt_val_short <- data.frame(
   "ID"=unique(rt_val$subj_idx),
   "overall_rt_diff"=rt_val[rt_val$valence == "positive", "mrt"]-rt_val[rt_val$valence == "negative", "mrt"])
+```
 
+Endorsements at post and differences from pre to post  
+
+```{r}
 nends_p <- bx_df %>% filter(session=="Post", valence=="negative") %>% 
   group_by(subj_idx) %>% summarize(m=mean(response), mrt=mean(rt))
 
@@ -640,7 +658,18 @@ if (all(pends_p$subj_idx==nends_p$subj_idx)) {
 
 ```{r}
 d1m <- GetMapEsts(GetSubjTraces(d1c), "short")
+```
 
+The traces are massive so can't put these in  the public data folder, however have uploaded the map ests  — thus these can be read in to reproduce further analysis  
+```{r}
+#write.csv(d1m, "./Public_Data/short_form_map_ests.csv")
+d1m <- read.csv("./Public_Data/short_form_map_ests.csv")
+```
+
+
+Write 
+
+```{r}
 rt <- bx_df %>% 
   group_by(subj_idx) %>% summarize(m=mean(rt), mrt=mean(rt))
 
@@ -668,7 +697,8 @@ s_bdf <- bx_df
 ```
 
 ```{r}
-m1_ddm_ppcs <- read.csv("../../model_res/ppcs/HDDM_ppcs_v-val_ddm_add_trialwise_NO-SZ_s_vt_with-z_9533.csv")
+#m1_ddm_ppcs <- read.csv("../../model_res/ppcs/HDDM_ppcs_v-val_ddm_add_trialwise_NO-SZ_s_vt_with-z_9533.csv")
+m1_ddm_ppcs <- read.csv("./Public_Data/HDDM_ppcs_v-val_ddm_add_trialwise_NO-SZ_s_vt_with-z_9533.csv")
 ```
 
 Recode response 
@@ -847,6 +877,10 @@ qp_df <-
 ```
 
 ```{r}
+qp_df$model <- factor(qp_df$model, levels=c("empirical", "ddm"))
+```
+
+```{r, fig.width=10}
 qp_plot <- ggplot(qp_df, aes(x=rp, y=q, fill=model)) + geom_point(pch=21, size=6, alpha=.7) + 
   facet_wrap( ~ valence) + ga + ap + lp + ft + 
   ylab("reaction time") + xlab("response frequency") +
@@ -951,16 +985,18 @@ qp_plot
 
 
 
-## Regression models and symptom analyses   
+## Symptom analyses and regression models   
 
-### Prep questionnaire items  
+### First prep questionnaire items  
 
 
 ```{r}
 completer_ids <- unique(bx_df$subj_idx)
-item_qairre_df <- read.csv("./../../data/raw_files/justDASSandFFMQ_with_imputes_replaced_with_999.csv")
+#item_qairre_df <- read.csv("./../../data/raw_files/justDASSandFFMQ_with_imputes_replaced_with_999.csv")
+item_qairre_df <- read.csv("./Public_Data/justDASSandFFMQ_with_imputes_replaced_with_999.csv")
 #all(item_qairre_df$ID.ffmq==item_qairre_df$ID.DASS) # Pulled from different excel sheets so this double check IDs lined up exactly
 ```
+
 
 
 ```{r}
@@ -976,19 +1012,12 @@ iq_c <- item_qairre_df %>% filter(ID.ffmq %in% completer_ids)
 ```{r}
 iq_c_d <- iq_c[grep("DASS", names(iq_c))]
 ```
-`
-
 
 
 Time 1 - just depression subscale 
 ```{r}
 # Time 1 
 dd1 <- iq_c_d[paste0("DASS1.", dass_dep_qs)]
-```
-
-
-```{r}
-#cor(dd1, use=complete.cases)
 ```
 
 
@@ -1031,6 +1060,10 @@ dd1$dass_sum_score <- rowSums(dd1[2:15])
 #gdf$DASS_Depression_SUM_Q1==rowSums(dd1)
 ```
 
+```{r}
+mean(dd1$dass_sum_score) # Depression only 
+sd(dd1$dass_sum_score)
+```
 
 Time 2
 
@@ -1070,14 +1103,15 @@ dd2$dass_sum_score
 ```
 
 
-### Symptoms  
+### Symptom analyses (which just involve depression questionnaire)      
 
 ```{r}
 dass_time_1 <- dd1
 dass_time_2 <- dd2
 ```
 
-Make sure the DASS are numerically ordered, then give them names  
+Make sure the DASS are numerically ordered, then give them names   
+
 
 ```{r}
 order <- as.numeric(unlist(
@@ -1148,11 +1182,6 @@ pivot_longer(cols = no.positive.feelings:no.initiative,
 
 
 ```{r}
-d1_lf
-```
-
-
-```{r}
 d2_short <- dass_time_2 %>% filter(ID %in% dass_time_1$ID)
 if (all(d1_short$ID==d2_short$ID)) {
   change_extra <- d2_short[1:length(dass_dep_qs)] - d1_short[1:length(dass_dep_qs)]
@@ -1166,7 +1195,6 @@ labs <- unlist(lapply(strsplit(unique(d1_lf$item), "[.]"), function(x) {
   out <- paste0(x, collapse=" ")
 out
 }))
-
 ```
 
 
@@ -1183,7 +1211,7 @@ d1_summs_ID <- d1_lf %>% group_by(item, ID) %>% summarize(m=mean(scores))
 
 d1_sds <- d1_lf %>% group_by(item) %>% 
   summarize(ci95=qnorm(.975)*sd(scores)/sqrt(length(unique(bx_df$subj_idx))))
-d1_sds
+
 if (all(d1_summs$item==d1_sds$item)) d1_summs$ci95 <- d1_sds$ci95
 
 
@@ -1201,7 +1229,6 @@ b_labs <- unlist(lapply(strsplit(base_labs, "[.]"), function(x) {
   out <- paste0(x, collapse=" ")
 out
 }))
-b_labs
 ```
 
 
@@ -1331,7 +1358,6 @@ all_res <- foreach (i = 1:length(unique_items)) %do% {
   }
 out
 } %>% bind_rows()
-all_res
 ```
 
 
@@ -1350,22 +1376,20 @@ all_res[which(is.na(all_res$signif)), "signif"] <- " "
 ```{r}
 all_res_arr <- all_res %>% arrange(r)
 all_res_arr$item <- factor(all_res_arr$item, levels=rev(c(all_res_arr$item)))
-all_res_arr
 ```
 
 ```{r}
-all_res_arr %>% select(item, bonferroni, signif)
+#all_res_arr %>% select(item, bonferroni, signif)
 ```
 ```{r}
 #ch_lf$item_f <- factor(ch_lf$item, levels=rev(c(ch_summs_arr$item)))
 #relab <- unlist(map(strsplit(levels(ch_lf$item_f), "change_"), 2))
 r_b_labs <- as.character(levels(all_res_arr$item))
-r_b_labs
+
 rb_labs <- unlist(lapply(strsplit(r_b_labs, "[.]"), function(x) {
   out <- paste0(x, collapse=" ")
 out
 }))
-rb_labs
 ```
 
 ```{r}
@@ -1438,11 +1462,10 @@ all_res_ch[which(all_res_ch$p < .001), "signif"] <- "****"
 all_res_ch[which(is.na(all_res_ch$signif)), "signif"] <- " "
 #all_res_ch
 arc_arr <- all_res_ch %>% arrange(r)
-arc_arr
+#arc_arr
 arc_arr$item_f <- factor(arc_arr$item, levels=rev(as.character(arc_arr$item)))
 #arc_arr$item_f <- factor(arc_arr$item, levels=as.character(arc_arr$item))
-arc_arr$item_f
-
+#arc_arr$item_f
 ```
 
 
@@ -1455,7 +1478,6 @@ rch_labs <- unlist(lapply(strsplit(r_ch_labs, "[.]"), function(x) {
   out <- unlist(map(strsplit(out, "change_"), 2))
 out
 }))
-rch_labs
 ```
 ```{r}
 # all_res_ch # Spot checked 
@@ -1511,7 +1533,10 @@ psych::alpha(dd2[2:15])
 ```
 
 
+### Continuing to prep for regressions...   
+
 **FFMQ**  
+
 
 ```{r}
 iq_c_m <- iq_c[grep("FFMQ", names(iq_c))]
@@ -1525,7 +1550,8 @@ non_react <- c(4, 9, 19, 21, 24, 29, 33)
 observe <- c(1, 6, 11, 15, 20, 26, 31, 36)
 ```
 
-Time 1 
+Time 1  
+
 
 ```{r}
 m1 <- iq_c_m[grep("FFMQ1.", names(iq_c_m))]
@@ -1574,6 +1600,18 @@ cor.test(m1$observe_sum, m1$aware_sum)
 cor.test(m1$observe_sum, m1$nonjudge_sum)
 cor.test(m1$observe_sum, m1$nonreact_sum)
 cor.test(m1$aware_sum, m1$nonreact_sum)
+```
+
+```{r}
+mean(m1$aware_sum); sd(m1$aware_sum)
+```
+
+```{r}
+mean(m1$nonjudge_sum); sd(m1$nonjudge_sum)
+```
+
+```{r}
+mean(m1$nonreact_sum); sd(m1$nonreact_sum)
 ```
 
 ```{r}
@@ -1641,7 +1679,6 @@ psych::alpha(m2[2:40][observe])
 d1m is the MAP est df created above - rename d1me  
 ```{r}
 d1me <- d1m
-d1me
 ```
 
 *--Valence: Baseline effects--*  
@@ -1649,95 +1686,81 @@ d1me
 
 *Depression*  
 
+
+Put MAP ests, DASS scores, and endorsement differences at baseline into the same dataframe    
+
 ```{r}
 # Match the IDs in the qairre and map ests datasets  
 dd1_red <- dd1 %>% 
   filter(ID %in% intersect(d1me$ID, dd1$ID)) %>% arrange(ID)
 
 d1_red <- d1me %>% filter(ID %in% intersect(d1me$ID, dd1_red$ID)) %>% arrange(ID)
+```
 
+
+```{r}
 # Combine them 
 if (all(d1_red$ID == dd1_red$ID)) fdf_depr <- data.frame(d1_red, dd1_red$dass_sum_score)
 ```
 
 
-Examining how the machine learning procedure by Beevers et al. 19 JAP influences sparsity. Model draws on code included in the paper   
+Recalc baseline positive and negative endorsement diffs  
 
 ```{r}
-var_names <- c(
-      # 3, 5, 10, 13
-      "no-positive-feelings", "couldnt-get-going", "easily-upset", "sad-and-depressed",
-        # 16, 17, 21
-        "lost-interest", "not-worth-much-as-person", "life-not-worthwhile", 
-        # 24, 26, 31, 34, 37, 
-        "no-enjoyment", "down-hearted-and-blue", "no-enthusiasm", "worthless", "no-hope", 
-        #38, 42
-        "life-meaningless", "no-initiative",
-        "drift_regressor"
-        )
-```
+nends_b <- bx_df %>% filter(session=="Pre", valence=="negative") %>% 
+  group_by(subj_idx) %>% summarize(m=mean(response), mrt=mean(rt))
 
+pends_b <- bx_df %>% filter(session=="Pre", valence=="positive") %>% group_by(subj_idx) %>% 
+  summarize(m=mean(response), mrt=mean(rt))
 
-Empirical 
-
-
-```{r}
-if (all(d1_red$ID == dd1_red$ID)) {
-  t1_depr_combined <- data.frame(dd1_red, "v_val_ctr"=d1_red$v_val_ctr_)  
+if (all(pends_b$subj_idx==nends_b$subj_idx)) {
+  pends_b$pn_diff <- pends_b$m-nends_b$m
+  pends_b$pn_rt_diff <- pends_b$mrt-nends_b$mrt
 }
-#cor.test(t1_depr_combined$v_val_ctr, t1_depr_combined$dass_sum_score)
-cmat <- cor(t1_depr_combined %>% select(-c(ID, dass_sum_score)))
-cmat
 ```
 
 ```{r}
-just_rel_vars_emp <- cbind(t1_depr_combined[grep("DASS1", names(t1_depr_combined))], t1_depr_combined$v_val_ctr) %>% 
-  setNames(var_names)
-rf_out_emp <- beset_rf(drift_regressor ~ ., data=just_rel_vars_emp)
-importance(rf_out_emp)
+# Match and combine the endorsements dataset with the depression one  
+ends_sub <- pends_b %>% filter(subj_idx %in% fdf_depr$ID) 
+# Add the difference in positive-negative endorsements to the depression dataset  
+if (all(ends_sub$subj_idx==fdf_depr$ID)) fdf_depr <- data.frame(fdf_depr, "pos_neg_ends_diff"=ends_sub$pn_diff)
 ```
-
-
-To examine the influence of sample size, we 
-
-- Increase the n here - the other ones get more significnat, but the sparsity — their main conceptual point — is the 
-Simulate multivariate normal based on true correlation matrix 
-
 
 
 
 
 ```{r}
-sample_sizes <- c(100, 200, 500, 1e3, 5e3) 
+rt <- bx_df %>% 
+  group_by(subj_idx) %>% summarize(m=mean(rt), mrt=mean(rt))
 
+rt_val <- bx_df %>% 
+  group_by(subj_idx, valence) %>% summarize(mrt=mean(rt))
 
-for (ss in seq_along(sample_sizes)) {
-  simulated_data <- rnorm_multi(n=sample_sizes[ss], vars=ncol(cmat), mu=0, sd=1, r=cmat)
-  # Impose constraints on the depression items  
-  depr_items <- round(simulated_data[1:14, 1:14], 0) 
-  depr_items[depr_items < 0] <- 0
-  depr_items[depr_items > 3] <- 3
-  
-  # Put them back in 
-  simulated_data[1:14, 1:14] <- depr_items
-  simulated_data <- simulated_data %>% setNames(var_names)
-  
-  rf_out <- beset_rf(drift_regressor ~ ., data=simulated_data)
-  print(importance(rf_out))
+rt_val_short <- data.frame(
+  "ID"=unique(rt_val$subj_idx),
+  "overall_rt_diff"=rt_val[rt_val$valence == "positive", "mrt"]-rt_val[rt_val$valence == "negative", "mrt"])
+
+nends_p <- bx_df %>% filter(session=="Post", valence=="negative") %>% 
+  group_by(subj_idx) %>% summarize(m=mean(response), mrt=mean(rt))
+
+pends_p <- bx_df %>% filter(session=="Post", valence=="positive") %>% group_by(subj_idx) %>% summarize(m=mean(response), mrt=mean(rt))
+
+if (all(pends_p$subj_idx==nends_p$subj_idx)) {
+  pends_p$pn_diff <- pends_p$m-nends_p$m
+  pends_p$pn_rt_diff <- pends_p$mrt-nends_p$mrt
 }
-
 ```
-
-
-```{r}
-importance(rf_out)
-```
- 
 
 Depression relationship 
 
+
+
 ```{r}
 cor.test(fdf_depr$dd1_red.dass_sum_score, fdf_depr$v_val_ctr_)
+```
+
+```{r}
+cor.test(fdf_depr$dd1_red.dass_sum_score, fdf_depr$pos_neg_ends_diff)
 ```
 
 Figure 4B, right  
@@ -1775,6 +1798,12 @@ if (all(d1_r$ID == m1_r$ID)) fdf <- data.frame(d1_r,
                                                m1_r$aware_sum, m1_r$nonjudge_sum, m1_r$nonreact_sum, m1_r$observe_sum)
 ```
 
+Add the endorsement difference variable  
+```{r}
+ends_sub_m <- pends_b %>% filter(subj_idx %in% m1_r$ID)
+
+if (all(m1_r$ID == ends_sub_m$subj_idx)) fdf <- data.frame(fdf, "pos_neg_diff_m"=ends_sub_m$pn_diff)
+```
 
 
 ```{r}
@@ -1786,6 +1815,18 @@ summary(
 )
 
 car::vif(md_ddm_1)
+```
+
+Compare to raw endorsement difference as outcome var  
+```{r}
+summary(
+  md_raw_1 <- lm(pos_neg_diff_m ~ 
+           scale(m1_r.aware_sum)*scale(m1_r.nonjudge_sum) + 
+           scale(m1_r.nonreact_sum) ,
+   data=fdf)
+)
+
+car::vif(md_raw_1)
 ```
 
 ```{r}
@@ -1893,6 +1934,15 @@ cor.test(fdf$fdf_depr.dd1_red.dass_sum_score, fdf$m1_r.aware_sum)
 ```
 
 
+Check other mindfulness facet - depression relationships  
+- Comparably strong relationship with non-judgment but weaker with non-react  
+
+```{r}
+cor.test(fdf$fdf_depr.dd1_red.dass_sum_score, fdf$m1_r.nonjudge_sum)
+cor.test(fdf$fdf_depr.dd1_red.dass_sum_score, fdf$m1_r.nonreact_sum)
+```
+
+
 
 ```{r}
 summary(
@@ -1915,11 +1965,30 @@ cor.test(fdf$v_val_ctr_, fdf$m1_r.aware_sum)
 Add dosage for time 
 
 ```{r}
-big_df <- haven::read_sav("./../../data/raw_files/K23_Hitchcock_medpracticedata.sav")
-big_df <- big_df %>% filter(ID %in% fdf$ID) %>% arrange(ID)
-fdf_md <- fdf %>% filter(ID %in% big_df$ID) %>% arrange(ID)
-if (all(fdf_md$ID==big_df$ID)) cor.test(fdf_md$v_val_ctr.sess_ctr_, big_df$TOTALminpwerwk.8wks)
+# big_df <- haven::read_sav("./../../data/raw_files/K23_Hitchcock_medpracticedata.sav")
+# big_df <- big_df %>% filter(ID %in% fdf$ID) %>% arrange(ID)
+# fdf_md <- fdf %>% filter(ID %in% big_df$ID) %>% arrange(ID)
+# if (all(fdf_md$ID==big_df$ID)) cor.test(fdf_md$v_val_ctr.sess_ctr_, big_df$TOTALminpwerwk.8wks)
 ```
+
+Recreate post - pre scores  
+```{r}
+# Post scores  
+nends_p <- bx_df %>% filter(session=="Post", valence=="negative") %>% 
+  group_by(subj_idx) %>% summarize(m=mean(response), mrt=mean(rt))
+
+pends_p <- bx_df %>% filter(session=="Post", valence=="positive") %>% group_by(subj_idx) %>% summarize(m=mean(response), mrt=mean(rt))
+
+if (all(pends_p$subj_idx==nends_p$subj_idx)) {
+  pends_p$pn_diff <- pends_p$m-nends_p$m
+}
+```
+
+Create a difference variable of (post pos - neg) - (pre pos - neg)  
+```{r}
+if (all(pends_p$subj_idx==pends_b$subj_idx)) pends_p$diff_in_diff_pn_ends <- pends_p$pn_diff - pends_b$pn_diff
+```
+
 
 We are just looking at FFMQ and depression at pre- and post-intervention and want to relate these to the SRET valence*time regressor. 
 Had originally tried mixed-effects models to try to get time REs, but had convergence issues which make sense given low data per pt, so 
@@ -2001,9 +2070,69 @@ comb_ch
 d1me_shared <- d1me %>% filter(ID %in% mindfulness_changes$ID)
 ```
 
+**Examining how the machine learning procedure by Beevers et al. 19 JAP influences sparsity. Model draws on code included in the paper**   
+
+
 ```{r}
-d1me_shared
+var_names <- c(
+      # 3, 5, 10, 13
+      "no-positive-feelings", "couldnt-get-going", "easily-upset", "sad-and-depressed",
+        # 16, 17, 21
+        "lost-interest", "not-worth-much-as-person", "life-not-worthwhile", 
+        # 24, 26, 31, 34, 37, 
+        "no-enjoyment", "down-hearted-and-blue", "no-enthusiasm", "worthless", "no-hope", 
+        #38, 42
+        "life-meaningless", "no-initiative",
+        "drift_regressor"
+        )
 ```
+
+
+Empirical 
+
+
+```{r}
+if (all(d1_red$ID == dd1_red$ID)) {
+  t1_depr_combined <- data.frame(dd1_red, "v_val_ctr"=d1_red$v_val_ctr_)  
+}
+#cor.test(t1_depr_combined$v_val_ctr, t1_depr_combined$dass_sum_score)
+cmat <- cor(t1_depr_combined %>% select(-c(ID, dass_sum_score)))
+#cmat
+```
+
+```{r}
+just_rel_vars_emp <- cbind(t1_depr_combined[grep("DASS1", names(t1_depr_combined))], t1_depr_combined$v_val_ctr) %>% 
+  setNames(var_names)
+rf_out_emp <- beset_rf(drift_regressor ~ ., data=just_rel_vars_emp)
+importance(rf_out_emp)
+```
+
+
+To examine the influence of sample size  
+ 
+ (commented because time consuming)   
+```{r}
+# sample_sizes <- c(100, 200, 500, 1e3, 5e3) 
+# 
+# 
+# for (ss in seq_along(sample_sizes)) {
+#   simulated_data <- rnorm_multi(n=sample_sizes[ss], vars=ncol(cmat), mu=0, sd=1, r=cmat)
+#   # Impose constraints on the depression items  
+#   depr_items <- round(simulated_data[1:14, 1:14], 0) 
+#   depr_items[depr_items < 0] <- 0
+#   depr_items[depr_items > 3] <- 3
+#   
+#   # Put them back in 
+#   simulated_data[1:14, 1:14] <- depr_items
+#   simulated_data <- simulated_data %>% setNames(var_names)
+#   
+#   rf_out <- beset_rf(drift_regressor ~ ., data=simulated_data)
+#   print(importance(rf_out))
+# }
+
+```
+
+
 
 *Mindfulness change*  
 
@@ -2014,19 +2143,48 @@ if (all(d1me_shared$ID==mindfulness_changes$ID)) {
 }
 ```
 
+Add scaled variables  
+
+```{r}
+mindfulness_changes <- 
+  data.frame(mindfulness_changes,
+           data.frame(
+                       "aware_ch_sc"=scale(mindfulness_changes$aware_change), 
+                       "nj_ch_sc"=scale(mindfulness_changes$nj_change),
+                       "nr_ch_sc"=scale(mindfulness_changes$nr_change))
+)
+```
+
+Add the difference in difference endorsements variable to the df with mindfulness changes  
+```{r}
+diff_ends_sub <- pends_p %>% filter(subj_idx %in% mindfulness_changes$ID)
+
+if (all(diff_ends_sub$subj_idx==mindfulness_changes$ID)) mindfulness_changes<- data.frame(mindfulness_changes, "diff_in_diff_posneg"=diff_ends_sub$diff_in_diff_pn_ends)
+```
 
 ```{r}
 summary(
   change_1m <- 
     lm(dr_change ~ 
-           scale(aware_change)*scale(nj_change) + 
-           scale(nr_change),
+           aware_ch_sc*nj_ch_sc + 
+           nr_ch_sc,
    data=mindfulness_changes)
 )
 
 car::vif(change_1m)
 ```
 
+```{r}
+summary(
+  change_raw_m <- 
+    lm(diff_in_diff_posneg ~ 
+           aware_ch_sc*nj_ch_sc + 
+           nr_ch_sc,
+   data=mindfulness_changes)
+)
+
+car::vif(change_raw_m)
+```
 
 ```{r}
 out_2 <- summary(change_1m)
@@ -2037,6 +2195,7 @@ reg_df_2 <- data.table(c("aware-change", "non-judge-change", "non-react-change",
            out_2$coefficients[2:5, 2]) %>% setNames(c("coefficient", "estimate", "se"))
 
 reg_df_2$coefficient <- factor(reg_df_2$coefficient, levels=c("aware-change", "non-judge-change", "non-react-change", "aware*non-judge-change"))
+
 
 ```
 
@@ -2060,6 +2219,36 @@ mr_2
 
 #ggsave("../paper/figs/mindful_regr_change.png", mr_2, width=13, height=6)
 ```
+
+Robustness check - add treatment condition  
+
+
+```{r}
+assign_short <- extra_df_full %>% filter(ID %in% mindfulness_changes$ID)
+```
+
+```{r}
+testit::assert(assign_short$ID == mindfulness_changes$ID)
+mindfulness_changes$tx_cond <- assign_short$Treatment
+```
+
+```{r}
+mindfulness_changes$tx_cond_f <- factor(mindfulness_changes$tx_cond, levels=c("OM", "FA", "MBCT"))
+contrasts(mindfulness_changes$tx_cond_f) <- contr.sum(3)
+#mindfulness_changes$tx_cond_f
+```
+
+
+ 
+```{r}
+summary(
+  change_1m_tx <- 
+    lm(dr_change ~ tx_cond_f/(
+           scale(aware_change)*scale(nj_change) + 
+           scale(nr_change)),
+   data=mindfulness_changes)) 
+```
+
 
 Robustness check: Add observe  change 
 
@@ -2104,8 +2293,6 @@ dd1_shared <- dd1 %>% filter(ID %in% dd2$ID)
 
 dd2_shared <- dd2 %>% filter(ID %in% dd1$ID)
 
-
-
 if (all(dd1_shared$ID==dd2_shared$ID)) {
   depr_changes <- data.frame(dd1_shared$ID,
              dd2_shared$dass_sum_score-dd1_shared$dass_sum_score) %>% 
@@ -2116,11 +2303,20 @@ hist(depr_changes$depr_change)
 ```
 
 
+Subset map ests...  
 ```{r}
 d1me_shared_2 <- d1me %>% filter(ID %in% depr_changes$ID)
 ```
 
-*Mindfulness change*  
+... and endorsement changes   
+
+```{r}
+diff_ch_subs_d <- pends_p %>% filter(subj_idx %in% depr_changes$ID)
+```
+
+
+
+*Depression change*  
 
 ```{r}
 # Add drift rate change regressor
@@ -2129,9 +2325,44 @@ if (all(d1me_shared_2$ID==depr_changes$ID)) {
 }
 ```
 
+
+```{r}
+# Add drift rate change regressor
+if (all(diff_ch_subs_d$subj_idx==depr_changes$ID)) {
+  depr_changes$ends_change <- diff_ch_subs_d$diff_in_diff_pn_ends
+}
+```
+
 ```{r}
 cor.test(depr_changes$dr_change, depr_changes$depr_change)
 ```
+```{r}
+cor.test(depr_changes$ends_change, depr_changes$depr_change)
+```
+
+```{r}
+assign_short_2 <- extra_df_full %>% filter(ID %in% depr_changes$ID)
+```
+
+```{r}
+testit::assert(assign_short_2$ID == depr_changes$ID)
+depr_changes$tx_cond <- assign_short_2$Treatment
+```
+
+```{r}
+depr_changes$tx_cond_f <- factor(depr_changes$tx_cond, levels=c("OM", "FA", "MBCT"))
+contrasts(depr_changes$tx_cond_f) <- contr.sum(3)
+```
+
+Check dependence on treatment condition  
+
+```{r}
+summary(m1 <- lm(dr_change ~ depr_change, data=depr_changes))
+summary(m1 <- lm(dr_change ~ tx_cond_f/depr_change, data=depr_changes))
+```
+
+
+
 
 
 ```{r}
@@ -2167,16 +2398,30 @@ summary(
 
 cor.test(mindfulness_changes$depr_changes.depr_change, mindfulness_changes$aware_change)
 ```
-Robustness check: Depression and DDM 
+
+Relationship between change in different mindfulness facets and depression change  
 ```{r}
-cor.test(mindfulness_changes$dr_change_ddm, 
-         mindfulness_changes$depr_changes.depr_change)
+cor.test(mindfulness_changes$aware_change, mindfulness_changes$depr_changes.depr_change)
 ```
 
+```{r}
+cor.test(mindfulness_changes$nj_change, mindfulness_changes$depr_changes.depr_change)
+```
+
+```{r}
+cor.test(mindfulness_changes$nr_change, mindfulness_changes$depr_changes.depr_change)
+```
+
+Robustness check: Depression and DDM -- still relevant?  
+```{r}
+# cor.test(mindfulness_changes$dr_change_ddm, 
+#          mindfulness_changes$depr_changes.depr_change)
+```
 
 
 ## Results: Split-half and test-retest reliability of model parameters   
 
+These are also too big to put in `Public_Data`  
 ```{r}
 even_ddm <- read.csv("../../model_res/traces/DDM_split_half_even_wtrialwise_poutlier057074.csv")
 odd_ddm <- read.csv("../../model_res/traces/DDM_split_half_odd__wtrialwise_poutlier052866.csv")
@@ -2405,9 +2650,7 @@ mb_d_ICCs_sh <- rbind(
 )
 ```
 
-```{r}
-mb_d_ICCs
-```
+
 
 ```{r}
 # mb_d_ICCs_sh$lb <- mb_d_ICCs_sh$ICC-mb_d_ICCs_sh$ci_lb
@@ -2483,7 +2726,7 @@ mf_p <- ggplot(mf_iccs, aes(x=var, y=ICC, group=label, fill=label)) +
   # theme(plot.title = element_text(margin=margin(b=-25), 
   #                   size=30, hjust=.15, vjust=.6))
 
-mf_p
+#mf_p
 ```
 
 ```{r}
@@ -2502,7 +2745,7 @@ mb_p <- ggplot(ddm_iccs, aes(x=var, y=ICC, group=label, fill=label)) +
   scale_fill_manual(values=c("tan1", "chocolate")) + lp
 ```
 
-```{r, fig.height=8}
+```{r, fig.height=8, fig.width=12}
 iccs_p <- mf_p / mb_p +
   plot_annotation(
   title = 'Stability of behavioral (top) and model-based (bottom) measures',
